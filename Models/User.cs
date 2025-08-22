@@ -4,13 +4,15 @@ using Microsoft.AspNetCore.Identity;
 
 namespace MigrationApi.Models
 {
-    public class User
+    public class User:IdentityUser<Guid>
     {
-        public Guid Id { get; set; }
-        [StringLength(50)]
-        public string Login { get; set; } = string.Empty;
+
+       
+        
+        // [StringLength(50)]
+        // public string Login { get; set; } = string.Empty;
         [StringLength(100)]
-        public string Password { get; set; } = string.Empty;
+        
         public int RoleID { get; set; }
         public Role? Role { get; set; }
         [StringLength(50)]

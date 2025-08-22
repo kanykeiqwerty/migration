@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MigrationApi.Models
 {
-    public class MigrationStatus
+    public class Status
     {
         public int Id { get; set; }
         [StringLength(25)]

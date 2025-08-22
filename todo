@@ -1,10 +1,12 @@
 Controllers:
 
-build User Registration and authorization
+
 Refactoring, dependency injection
 
 Для чтения (GET) — используй CountryDto, если возможно расширение полей, иначе строку.
 
 Для записи (POST/PUT) — используй CountryId (а не имя или объект).
 
-завтра прописать пут и делете где надо
+
+
+

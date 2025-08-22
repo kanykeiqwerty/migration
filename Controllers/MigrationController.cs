@@ -61,46 +61,81 @@ namespace MigrationApi.Controllers
             return Ok(migration);
         }
 
-       [HttpPost("citizenforms/{citizenFormId}/migrations")]
-public async Task<IActionResult> AddMigration(Guid citizenFormId, [FromBody] MigrationOneDto migrationDto)
-{
-    var citizenform = await _context.CitizenForms.FindAsync(citizenFormId);
-    if (citizenform == null)
-    {
-        return NotFound("CitizenForm not found");
-    }
+        [HttpPost("citizenforms/{citizenFormId}/migrations")]
+        public async Task<IActionResult> AddMigration(Guid citizenFormId, [FromBody] MigrationOneDto migrationDto)
+        {
+            var citizenform = await _context.CitizenForms.FindAsync(citizenFormId);
+            if (citizenform == null)
+            {
+                return NotFound("CitizenForm not found");
+            }
 
-    if (!ModelState.IsValid)
-    {
-        return BadRequest(ModelState);
-    }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-    var migration = new Migration
-    {
-        CitizenFormID = migrationDto.CitizenFormID,
-        DepartureDate = migrationDto.DepartureDate,
-        ReturnDate = migrationDto.ReturnDate,
-        CountryID = migrationDto.CountryId,
-        Profession = migrationDto.Profession,
-        EmploymentContract = migrationDto.EmploymentContract
-    };
+            var migration = new Migration
+            {
+                CitizenFormID = migrationDto.CitizenFormID,
+                DepartureDate = migrationDto.DepartureDate,
+                ReturnDate = migrationDto.ReturnDate,
+                CountryID = migrationDto.CountryId,
+                Profession = migrationDto.Profession,
+                EmploymentContract = migrationDto.EmploymentContract
+            };
 
-    _context.Migrations.Add(migration);
-    await _context.SaveChangesAsync();
+            _context.Migrations.Add(migration);
+            await _context.SaveChangesAsync();
 
-    var resultDto = new MigrationHistoryDto
-    {
-        Id = migration.Id,
-        DepartureDate = migration.DepartureDate,
-        ReturnDate = migration.ReturnDate,
-        CountryName = (await _context.Countries.FindAsync(migration.CountryID))?.Name,
-        Profession = migration.Profession,
-        EmploymentContract = migration.EmploymentContract
-    };
+            var resultDto = new MigrationHistoryDto
+            {
+                Id = migration.Id,
+                DepartureDate = migration.DepartureDate,
+                ReturnDate = migration.ReturnDate,
+                CountryName = (await _context.Countries.FindAsync(migration.CountryID))?.Name,
+                Profession = migration.Profession,
+                EmploymentContract = migration.EmploymentContract
+            };
 
-    return CreatedAtAction(nameof(GetMigrationById), new { id = migration.Id }, resultDto);
-}
+            return CreatedAtAction(nameof(GetMigrationById), new { id = migration.Id }, resultDto);
+        }
 
+        [HttpPut("{id}")]
+        public IActionResult Update(Guid Id, [FromBody] MigrationOneDto migrationDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var migration = _context.Migrations
+        .FirstOrDefault(m => m.Id == Id);
+            if (migration == null)
+                return NotFound();
+
+            migration.DepartureDate = migrationDto.DepartureDate;
+            migration.ReturnDate = migrationDto.ReturnDate;
+            migration.CountryID = migrationDto.CountryId;
+            migration.Profession = migrationDto.Profession;
+            migration.EmploymentContract = migrationDto.EmploymentContract;
+
+            _context.SaveChanges();
+            return NoContent();
+
+
+        }
+
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(Guid Id)
+        {
+            var migration = _context.Migrations.Find(Id);
+            if (migration == null)
+                return NotFound();
+
+            _context.Migrations.Remove(migration);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
 
     }
 }

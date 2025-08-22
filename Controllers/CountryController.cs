@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MigrationApi.Data;
 using MigrationApi.Dto;
 using MigrationApi.Models;
+using MigrationApi.Service.Interfaces;
 
 namespace MigrationApi.Controllers
 {
@@ -9,100 +10,49 @@ namespace MigrationApi.Controllers
     [ApiController]
     public class CountryController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICountryService _service;
 
-        public CountryController(AppDbContext context)
+        public CountryController(ICountryService service)
         {
-            _context = context;
+            _service=service;
         }
 
-        
+
         [HttpGet]
-        public IActionResult GetAllCountries()
+        public async Task<IActionResult> GetAll()
         {
-            if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-            var countries = _context.Countries
-                .Select(c => new CountryDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .ToList();
-
-            return Ok(countries);
-        }
-
-
-        [HttpGet("{id}")]
-        public IActionResult GetCountryById(int id)
-        {
-            
-
-            var country = _context.Countries
-                .Where(c => c.Id == id)
-                .Select(c => new CountryDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .FirstOrDefault();
-
-            if (country == null)
-                return NotFound();
-
+            var country = await _service.GetAllAsync();
             return Ok(country);
         }
 
-        
-        [HttpPost]
-        public IActionResult Create([FromBody] CountryDto countryDto)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            
-            
-            var newcountry = new Country
-            {
-                Name = countryDto.Name
-                
-            };
+            var country = await _service.GetByIdAsync(id);
+            if (country == null) return NotFound();
+            return Ok(country);
+       }
 
-            _context.Countries.Add(newcountry);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetCountryById), new { Id = newcountry.Id }, newcountry);
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CountryDto dto)
+        {
+            var country = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = country.Id }, country);
         }
-
         
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] CountryDto countryDto)
+        public async Task<IActionResult> Update(int id, [FromBody] CountryDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var country = _context.Countries
-            .FirstOrDefault(c => c.Id == id);
-
-            if (country == null)
-                return NotFound(); ;
-
-            
-
-            country.Name = countryDto.Name;
-            
-            _context.SaveChanges();
+            var success = await _service.UpdateAsync(id, dto);
+            if (!success) return NotFound();
             return NoContent();
         }
 
-        
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var country = _context.Countries.Find(id);
-            if (country == null)
-                return NotFound();
-
-            _context.Countries.Remove(country);
-            _context.SaveChanges();
-
+            var success = await _service.DeleteAsync(id);
+            if (!success) return NotFound();
             return NoContent();
         }
     }

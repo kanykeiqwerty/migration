@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MigrationApi.Data;
 using MigrationApi.Dto;
 using MigrationApi.Models;
+using MigrationApi.Service.Interfaces;
 
 namespace MigrationApi.Controllers
 {
@@ -10,172 +11,56 @@ namespace MigrationApi.Controllers
     [Route("api/citizen_forms")]
     public class CitizenFormController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        
+        private readonly ICitizenFormService _service;
 
-        public CitizenFormController(AppDbContext context)
+        public CitizenFormController(ICitizenFormService service)
         {
-            _context = context;
+          
+            _service = service;
         }
 
+        
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllForms()
+        public async Task<IActionResult> GetAll()
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var forms = await _context.CitizenForms
-            .Include(f => f.District)
-            .ThenInclude(d => d.Region)
-            .Include(f => f.Migrations)
-            .ThenInclude(m => m.Country)
-
-            .Select(f => new CitizenFormDto
-            {
-                RegistrationDate = f.RegistrationDate,
-                PIN = f.PIN,
-                FullName = f.FullName,
-                BirthDate = f.BirthDate,
-                Gender = f.Gender,
-                District = f.District == null ? null : new DistrictDto
-                {
-                    Name = f.District.Name,
-                    Region = f.District.Region == null ? null : new CreateRegionDto
-                    {
-                        Name = f.District.Region.Name
-                    }
-
-
-
-                },
-                Migrations = f.Migrations
-                .OrderByDescending(m => m.DepartureDate)
-                .Take(1)
-                .Select(m => new MigrationDto
-                {
-                    CountryName = m.Country.Name,
-                    DepartureDate = m.DepartureDate
-
-                }).ToList()
-            }).ToListAsync();
-
+            var forms = await _service.GetAllAsync();
             return Ok(forms);
-
-
-
         }
-
 
 
 
         [HttpGet("{id}")]
-        public IActionResult GetCitizenFormById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
-
-            var form = _context.CitizenForms
-            .Include(f => f.District)
-            .ThenInclude(d => d.Region)
-            .Include(f => f.Migrations)
-            .ThenInclude(m => m.Country)
-
-            .Select(f => new OneCitizenFormDto
-            {
-                RegistrationDate = f.RegistrationDate,
-                Id = f.Id,
-                ESYBMId = f.ESYBMId,
-                ENIcode = f.ENIcode,
-                PIN = f.PIN,
-                FirstName=f.FirstName,
-                LastName = f.LastName,
-                MidName = f.MidName,
-                BirthDate = f.BirthDate,
-                Gender = f.Gender,
-                Disabilities = f.Disabilities,
-                PhoneNumber = f.PhoneNumber,
-                RuralArea = f.RuralArea,
-                PopulationArea = f.PopulationArea,
-                Street = f.Street,
-                House = f.House,
-                Apartments = f.Apartments,
-                District = f.District == null ? null : new DistrictDto
-                {
-                    Name = f.District.Name,
-                    Region = f.District.Region == null ? null : new CreateRegionDto
-                    {
-                        Name = f.District.Region.Name
-                    }
-
-
-
-                },
-                MaritalStatus = f.MaritalStatus == null ? null : new MaritalStatusDto
-                {
-                    Name = f.MaritalStatus.Name
-                },
-
-                Migrations = f.Migrations.Select(m => new MigrationHistoryDto
-                {
-
-                    DepartureDate = m.DepartureDate,
-                    ReturnDate = m.ReturnDate,
-                    Profession = m.Profession,
-                    EmploymentContract = m.EmploymentContract,
-                    CountryName = m.Country.Name
-
-
-
-                }).ToList()
-
-
-
-
-            }).FirstOrDefault();
-
+            var form = await _service.GetByIdAsync(id);
+            if (form == null) return NotFound();
             return Ok(form);
         }
 
-
-
         [HttpPost]
-        public IActionResult Create([FromBody] CreateCitizenFormDto formDto)
+        public async Task<IActionResult> Create([FromBody] CreateCitizenFormDto dto)
         {
-            if (!_context.Districts.Any(d => d.Id == formDto.DistrictId))
-                return BadRequest("Invalid DistrictId");
+            var form = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = form.Id }, form);
+        }
 
-            // if (!_context.Regions.Any(r => r.Id == formDto.RegionId))
-            //     return BadRequest("Invalid RegionId");
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCitizenFormDto dto)
+        {
+            var success = await _service.UpdateAsync(id, dto);
+            if (!success) return NotFound();
+            return NoContent();
+        }
 
-            if (!_context.MaritalStatuses.Any(m => m.Id == formDto.MaritalStatusId))
-                return BadRequest("Invalid Marital Status Id");
-
-            var newform = new CitizenForm
-            {
-                PIN = formDto.PIN,
-                BirthDate = formDto.BirthDate,
-                Gender = formDto.Gender,
-                FirstName = formDto.FirstName,
-                LastName = formDto.LastName,
-                MidName = formDto.MidName,
-                Disabilities = formDto.Disabilities,
-                PhoneNumber = formDto.PhoneNumber,
-                ESYBMId = formDto.ESYBMId,
-                ENIcode = formDto.ENIcode,
-                RuralArea = formDto.RuralArea,
-                PopulationArea = formDto.PopulationArea,
-                Street = formDto.Street,
-                House = formDto.House,
-                Apartments = formDto.Apartments,
-                DistrictID = formDto.DistrictId,
-                MaritalStatusID = formDto.MaritalStatusId
-
-
-
-
-            };
-            _context.CitizenForms.Add(newform);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetCitizenFormById), new { id = newform.Id }, newform);
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var success = await _service.DeleteAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
         }
     }
 }

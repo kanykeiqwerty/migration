@@ -58,6 +58,9 @@ namespace MigrationApi.Models
 
         public bool IsArchived { get; set; } = false;
 
+         public int? StatusID { get; set; }
+         public Status? Status { get; set; }
+
         [Display(Name = "Full Name")]
         public string FullName
         {

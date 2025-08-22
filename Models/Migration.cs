@@ -10,8 +10,7 @@ namespace MigrationApi.Models
         public int CountryID { get; set; }
         public Country? Country { get; set; }
 
-        // public int MigrationStatusID { get; set; }
-        // public MigrationStatus? MigrationStatus { get; set; }
+        
 
 
         [DataType(DataType.Date)]

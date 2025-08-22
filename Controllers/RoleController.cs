@@ -5,88 +5,88 @@ using MigrationApi.Models;
 
 namespace MigrationApi.Controllers
 {
-    [Route("api/migration_status")]
+    [Route("api/role")]
     [ApiController]
-    public class MigrationStatusController : ControllerBase
+    public class RoleController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public MigrationStatusController(AppDbContext context)
+        public RoleController(AppDbContext context)
         {
             _context = context;
         }
 
         
         [HttpGet]
-        public IActionResult GetAllMigrationStatuses()
+        public IActionResult GetAllRoles()
         {
             if (!ModelState.IsValid)
         return BadRequest(ModelState);
-            var migrationstatuses = _context.MigrationStatuses
-                .Select(c => new MigrationStatusDto
+            var roles = _context.Roles
+                .Select(c => new RoleDto
                 {
                     Id = c.Id,
                     Name = c.Name
                 })
                 .ToList();
 
-            return Ok(migrationstatuses);
+            return Ok(roles);
         }
 
 
         [HttpGet("{id}")]
-        public IActionResult GetMigrationStatusById(int id)
+        public IActionResult GetRoleById(int id)
         {
             
 
-            var migrationstatuses = _context.MigrationStatuses
+            var role = _context.Roles
                 .Where(c => c.Id == id)
-                .Select(c => new MigrationStatusDto
+                .Select(c => new RoleDto
                 {
                     Id = c.Id,
                     Name = c.Name
                 })
                 .FirstOrDefault();
 
-            if (migrationstatuses == null)
+            if (role == null)
                 return NotFound();
 
-            return Ok(migrationstatuses);
+            return Ok(role);
         }
 
         
         [HttpPost]
-        public IActionResult Create([FromBody] MigrationStatusDto migrationstatusDto)
+        public IActionResult Create([FromBody] RoleDto roleDto)
         {
             
             
-            var newmigrationstatus = new MigrationStatus
+            var newrole = new Role
             {
-                Name = migrationstatusDto.Name
+                Name = roleDto.Name
                 
             };
 
-            _context.MigrationStatuses.Add(newmigrationstatus);
+            _context.Roles.Add(newrole);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetMigrationStatusById), new { Id = newmigrationstatus.Id }, newmigrationstatus);
+            return CreatedAtAction(nameof(GetRoleById), new { Id = newrole.Id }, newrole);
         }
 
         
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] MigrationStatusDto migrationstatusDto)
+        public IActionResult Update(int id, [FromBody] RoleDto roleDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var migrationstatuses = _context.MigrationStatuses
+            var role = _context.Roles
             .FirstOrDefault(c => c.Id == id);
 
-            if (migrationstatuses == null)
+            if (role == null)
                 return NotFound(); ;
 
             
 
-            migrationstatuses.Name = migrationstatusDto.Name;
+            role.Name = roleDto.Name;
             
             _context.SaveChanges();
             return NoContent();
@@ -96,11 +96,11 @@ namespace MigrationApi.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var migrationstatuses = _context.MigrationStatuses.Find(id);
-            if (migrationstatuses == null)
+            var role = _context.Roles.Find(id);
+            if (role == null)
                 return NotFound();
 
-            _context.MigrationStatuses.Remove(migrationstatuses);
+            _context.Roles.Remove(role);
             _context.SaveChanges();
 
             return NoContent();
