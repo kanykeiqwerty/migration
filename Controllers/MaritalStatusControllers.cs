@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MigrationApi.Data;
 using MigrationApi.Dto;
 using MigrationApi.Models;
+using MigrationApi.Service.Interfaces;
 
 namespace MigrationApi.Controllers
 {
@@ -9,100 +10,49 @@ namespace MigrationApi.Controllers
     [ApiController]
     public class MaritalStatusController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IMaritalStatusService _service;
 
-        public MaritalStatusController(AppDbContext context)
+        public MaritalStatusController(IMaritalStatusService service)
         {
-            _context = context;
+            _service=service;
         }
 
-        
+
         [HttpGet]
-        public IActionResult GetAllMaritalStatuses()
+        public async Task<IActionResult> GetAll()
         {
-            if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-            var maritalstatuses = _context.MaritalStatuses
-                .Select(c => new MaritalStatusDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .ToList();
-
-            return Ok(maritalstatuses);
+            var maritals = await _service.GetAllAsync();
+            return Ok(maritals);
         }
-
 
         [HttpGet("{id}")]
-        public IActionResult GetMaritalStatusById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            
+            var maritalStatus = await _service.GetByIdAsync(id);
+            if (maritalStatus == null) return NotFound();
+            return Ok(maritalStatus);
+       }
 
-            var maritalstatus = _context.MaritalStatuses
-                .Where(c => c.Id == id)
-                .Select(c => new MaritalStatusDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .FirstOrDefault();
-
-            if (maritalstatus == null)
-                return NotFound();
-
-            return Ok(maritalstatus);
-        }
-
-        
         [HttpPost]
-        public IActionResult Create([FromBody] MaritalStatusDto maritalstatusDto)
+        public async Task<IActionResult> Create([FromBody] MaritalStatusDto dto)
         {
-            
-            
-            var newmaritalstatus = new MaritalStatus
-            {
-                Name = maritalstatusDto.Name
-                
-            };
-
-            _context.MaritalStatuses.Add(newmaritalstatus);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetMaritalStatusById), new { Id = newmaritalstatus.Id }, newmaritalstatus);
+            var maritalStatus = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = maritalStatus.Id }, maritalStatus);
         }
-
         
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] MaritalStatusDto maritalstatusDto)
+        public async Task<IActionResult> Update(int id, [FromBody] MaritalStatusDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var maritalstatus = _context.MaritalStatuses
-            .FirstOrDefault(c => c.Id == id);
-
-            if (maritalstatus == null)
-                return NotFound(); ;
-
-            
-
-            maritalstatus.Name = maritalstatusDto.Name;
-            
-            _context.SaveChanges();
+            var success = await _service.UpdateAsync(id, dto);
+            if (!success) return NotFound();
             return NoContent();
         }
 
-        
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var maritalstatus = _context.MaritalStatuses.Find(id);
-            if (maritalstatus == null)
-                return NotFound();
-
-            _context.MaritalStatuses.Remove(maritalstatus);
-            _context.SaveChanges();
-
+            var success = await _service.DeleteAsync(id);
+            if (!success) return NotFound();
             return NoContent();
         }
     }

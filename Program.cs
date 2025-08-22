@@ -21,6 +21,12 @@ builder.Services.AddScoped<ICitizenFormService, CitizenFormService>();
 builder.Services.AddScoped<ICitizenFormRepository, CitizenFormRepository>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<ICountryRepository, CountryRepository>();
+builder.Services.AddScoped<IDistrictService, DistrictService>();
+builder.Services.AddScoped<IDistrictRepository, DistrictRepository>();
+builder.Services.AddScoped<IMaritalStatusService, MaritalStatusService>();
+builder.Services.AddScoped<IMaritalStatusRepository, MaritalStatusRepository>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
 
 

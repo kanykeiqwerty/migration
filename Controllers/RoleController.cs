@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MigrationApi.Data;
 using MigrationApi.Dto;
 using MigrationApi.Models;
+using MigrationApi.Service.Interfaces;
 
 namespace MigrationApi.Controllers
 {
@@ -9,100 +10,49 @@ namespace MigrationApi.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IRoleService _service;
 
-        public RoleController(AppDbContext context)
+        public RoleController(IRoleService service)
         {
-            _context = context;
+            _service=service;
         }
 
-        
+
         [HttpGet]
-        public IActionResult GetAllRoles()
+        public async Task<IActionResult> GetAll()
         {
-            if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-            var roles = _context.Roles
-                .Select(c => new RoleDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .ToList();
-
-            return Ok(roles);
-        }
-
-
-        [HttpGet("{id}")]
-        public IActionResult GetRoleById(int id)
-        {
-            
-
-            var role = _context.Roles
-                .Where(c => c.Id == id)
-                .Select(c => new RoleDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .FirstOrDefault();
-
-            if (role == null)
-                return NotFound();
-
+            var role = await _service.GetAllAsync();
             return Ok(role);
         }
 
-        
-        [HttpPost]
-        public IActionResult Create([FromBody] RoleDto roleDto)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            
-            
-            var newrole = new Role
-            {
-                Name = roleDto.Name
-                
-            };
+            var role = await _service.GetByIdAsync(id);
+            if (role == null) return NotFound();
+            return Ok(role);
+       }
 
-            _context.Roles.Add(newrole);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetRoleById), new { Id = newrole.Id }, newrole);
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] RoleDto dto)
+        {
+            var role = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = role.Id }, role);
         }
-
         
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] RoleDto roleDto)
+        public async Task<IActionResult> Update(int id, [FromBody] RoleDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var role = _context.Roles
-            .FirstOrDefault(c => c.Id == id);
-
-            if (role == null)
-                return NotFound(); ;
-
-            
-
-            role.Name = roleDto.Name;
-            
-            _context.SaveChanges();
+            var success = await _service.UpdateAsync(id, dto);
+            if (!success) return NotFound();
             return NoContent();
         }
 
-        
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var role = _context.Roles.Find(id);
-            if (role == null)
-                return NotFound();
-
-            _context.Roles.Remove(role);
-            _context.SaveChanges();
-
+            var success = await _service.DeleteAsync(id);
+            if (!success) return NotFound();
             return NoContent();
         }
     }
