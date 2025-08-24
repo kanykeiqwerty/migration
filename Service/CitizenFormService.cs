@@ -19,6 +19,7 @@ namespace MigrationApi.Service
             var forms = await _repo.GetAllAsync();
             return forms.Select(f => new CitizenFormDto
             {
+                Id=f.Id,
                 RegistrationDate = f.RegistrationDate,
                 PIN = f.PIN,
                 FullName = f.FullName,

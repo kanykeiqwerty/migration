@@ -2,6 +2,7 @@ namespace MigrationApi.Dto
 {
     public class CitizenFormDto
     {
+        public Guid Id { get; set; }
         public DateTime RegistrationDate { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string PIN { get; set; } = string.Empty;

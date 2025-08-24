@@ -1,141 +1,59 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MigrationApi.Data;
 using MigrationApi.Dto;
 using MigrationApi.Models;
+using MigrationApi.Service.Interfaces;
 
 namespace MigrationApi.Controllers
 {
+    [Route("api/migration_history")]
     [ApiController]
-    [Route("api/migrations")]
     public class MigrationController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IMigrationService _service;
 
-        public MigrationController(AppDbContext context)
+        public MigrationController(IMigrationService service)
         {
-            _context = context;
+            _service=service;
         }
-
 
 
         [HttpGet]
-        public IActionResult GetAllMigrations()
+        public async Task<IActionResult> GetAll()
         {
-            var migrations = _context.Migrations
-            .Include(m => m.CitizenForm)
-            .Select(m => new MigrationHistoryDto
-            {
-                Id = m.Id,
-                DepartureDate = m.DepartureDate,
-                ReturnDate = m.ReturnDate,
-                CountryName = m.Country.Name,
-                Profession = m.Profession,
-                EmploymentContract = m.EmploymentContract
-
-            }).ToList();
-
-            return Ok(migrations);
-        }
-
-
-        [HttpGet("{id}")]
-        public IActionResult GetMigrationById(Guid id)
-        {
-            var migration = _context.Migrations
-            .Where(m => m.Id == id)
-            .Select(m => new MigrationHistoryDto
-            {
-                Id = m.Id,
-                DepartureDate = m.DepartureDate,
-                ReturnDate = m.ReturnDate,
-                CountryName = m.Country.Name,
-                Profession = m.Profession,
-                EmploymentContract = m.EmploymentContract
-
-            }).FirstOrDefault();
-
-            if (migration == null)
-                return NotFound();
-
+            var migration = await _service.GetAllAsync();
             return Ok(migration);
         }
 
-        [HttpPost("citizenforms/{citizenFormId}/migrations")]
-        public async Task<IActionResult> AddMigration(Guid citizenFormId, [FromBody] MigrationOneDto migrationDto)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var citizenform = await _context.CitizenForms.FindAsync(citizenFormId);
-            if (citizenform == null)
-            {
-                return NotFound("CitizenForm not found");
-            }
+            var migration = await _service.GetByIdAsync(id);
+            if (migration == null) return NotFound();
+            return Ok(migration);
+       }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var migration = new Migration
-            {
-                CitizenFormID = migrationDto.CitizenFormID,
-                DepartureDate = migrationDto.DepartureDate,
-                ReturnDate = migrationDto.ReturnDate,
-                CountryID = migrationDto.CountryId,
-                Profession = migrationDto.Profession,
-                EmploymentContract = migrationDto.EmploymentContract
-            };
-
-            _context.Migrations.Add(migration);
-            await _context.SaveChangesAsync();
-
-            var resultDto = new MigrationHistoryDto
-            {
-                Id = migration.Id,
-                DepartureDate = migration.DepartureDate,
-                ReturnDate = migration.ReturnDate,
-                CountryName = (await _context.Countries.FindAsync(migration.CountryID))?.Name,
-                Profession = migration.Profession,
-                EmploymentContract = migration.EmploymentContract
-            };
-
-            return CreatedAtAction(nameof(GetMigrationById), new { id = migration.Id }, resultDto);
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] MigrationOneDto dto)
+        {
+            var migration = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = migration.Id }, migration);
         }
-
+        
         [HttpPut("{id}")]
-        public IActionResult Update(Guid Id, [FromBody] MigrationOneDto migrationDto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] MigrationOneDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var migration = _context.Migrations
-        .FirstOrDefault(m => m.Id == Id);
-            if (migration == null)
-                return NotFound();
-
-            migration.DepartureDate = migrationDto.DepartureDate;
-            migration.ReturnDate = migrationDto.ReturnDate;
-            migration.CountryID = migrationDto.CountryId;
-            migration.Profession = migrationDto.Profession;
-            migration.EmploymentContract = migrationDto.EmploymentContract;
-
-            _context.SaveChanges();
+            var success = await _service.UpdateAsync(id, dto);
+            if (!success) return NotFound();
             return NoContent();
-
-
         }
-
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(Guid Id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var migration = _context.Migrations.Find(Id);
-            if (migration == null)
-                return NotFound();
-
-            _context.Migrations.Remove(migration);
-            _context.SaveChanges();
-
+            var success = await _service.DeleteAsync(id);
+            if (!success) return NotFound();
             return NoContent();
         }
-
     }
 }

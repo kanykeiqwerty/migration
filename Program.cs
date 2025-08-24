@@ -27,6 +27,12 @@ builder.Services.AddScoped<IMaritalStatusService, MaritalStatusService>();
 builder.Services.AddScoped<IMaritalStatusRepository, MaritalStatusRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IStatusService, StatusService>();
+builder.Services.AddScoped<IStatusRepository, StatusRepository>();
+builder.Services.AddScoped<IRegionService, RegionService>();
+builder.Services.AddScoped<IRegionRepository, RegionRepository>();
+builder.Services.AddScoped<IMigrationService, MigrationService>();
+builder.Services.AddScoped<IMigrationRepository, MigrationRepository>();
 
 
 

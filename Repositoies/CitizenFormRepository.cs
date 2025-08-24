@@ -28,6 +28,7 @@ namespace MigrationApi.Repositories
                 .Include(f => f.District).ThenInclude(d => d.Region)
                 .Include(f => f.Migrations).ThenInclude(m => m.Country)
                 .Include(f => f.Status)
+                .Include(f=>f.MaritalStatus )
                 .FirstOrDefaultAsync(f => f.Id == id);
         }
 

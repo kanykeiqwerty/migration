@@ -2,107 +2,57 @@ using Microsoft.AspNetCore.Mvc;
 using MigrationApi.Data;
 using MigrationApi.Dto;
 using MigrationApi.Models;
+using MigrationApi.Service.Interfaces;
 
 namespace MigrationApi.Controllers
 {
-    [Route("api/migration_status")]
+    [Route("api/status")]
     [ApiController]
     public class StatusController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IStatusService _service;
 
-        public StatusController(AppDbContext context)
+        public StatusController(IStatusService service)
         {
-            _context = context;
+            _service=service;
         }
 
-        
+
         [HttpGet]
-        public IActionResult GetAllStatuses()
+        public async Task<IActionResult> GetAll()
         {
-            if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-            var statuses = _context.Statuses
-                .Select(c => new StatusDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .ToList();
-
-            return Ok(statuses);
+            var status = await _service.GetAllAsync();
+            return Ok(status);
         }
-
 
         [HttpGet("{id}")]
-        public IActionResult GetStatusById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            
+            var status = await _service.GetByIdAsync(id);
+            if (status == null) return NotFound();
+            return Ok(status);
+       }
 
-            var statuses = _context.Statuses
-                .Where(c => c.Id == id)
-                .Select(c => new StatusDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-                .FirstOrDefault();
-
-            if (statuses == null)
-                return NotFound();
-
-            return Ok(statuses);
-        }
-
-        
         [HttpPost]
-        public IActionResult Create([FromBody] StatusDto statusDto)
+        public async Task<IActionResult> Create([FromBody] StatusDto dto)
         {
-            
-            
-            var newstatus = new Status
-            {
-                Name = statusDto.Name
-                
-            };
-
-            _context.Statuses.Add(newstatus);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetStatusById), new { Id = newstatus.Id }, newstatus);
+            var status = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = status.Id }, status);
         }
-
         
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] StatusDto statusDto)
+        public async Task<IActionResult> Update(int id, [FromBody] StatusDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var statuses = _context.Statuses
-            .FirstOrDefault(c => c.Id == id);
-
-            if (statuses == null)
-                return NotFound(); ;
-
-            
-
-            statuses.Name = statusDto.Name;
-            
-            _context.SaveChanges();
+            var success = await _service.UpdateAsync(id, dto);
+            if (!success) return NotFound();
             return NoContent();
         }
 
-        
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var statuses = _context.Statuses.Find(id);
-            if (statuses == null)
-                return NotFound();
-
-            _context.Statuses.Remove(statuses);
-            _context.SaveChanges();
-
+            var success = await _service.DeleteAsync(id);
+            if (!success) return NotFound();
             return NoContent();
         }
     }
