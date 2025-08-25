@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MigrationApi.Data;
@@ -22,7 +23,7 @@ namespace MigrationApi.Controllers
 
         
 
-
+        
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -39,14 +40,14 @@ namespace MigrationApi.Controllers
             if (form == null) return NotFound();
             return Ok(form);
         }
-
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCitizenFormDto dto)
         {
             var form = await _service.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = form.Id }, form);
         }
-
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCitizenFormDto dto)
         {

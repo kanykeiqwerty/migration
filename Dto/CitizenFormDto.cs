@@ -1,3 +1,5 @@
+using System.Diagnostics.Eventing.Reader;
+
 namespace MigrationApi.Dto
 {
     public class CitizenFormDto
@@ -43,6 +45,12 @@ namespace MigrationApi.Dto
         public MaritalStatusDto? MaritalStatus { get; set; }
         public List<MigrationHistoryDto> Migrations { get; set; } = new List<MigrationHistoryDto>();
 
+        public string? CreatedByUserName { get; set; }
+        public string? UpdatedByUserName { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public bool IsArchived { get; set; } = false;
+
 
 
 
@@ -71,6 +79,8 @@ namespace MigrationApi.Dto
         public string? Apartments { get; set; }
         public int DistrictId { get; set; }
         public int StatusId { get; set; }
+        // public string? CreatedByUserName { get; set; }
+        // public DateTime CreatedAt { get; set; }
 
 
 
@@ -104,7 +114,7 @@ namespace MigrationApi.Dto
 
         
         public int MaritalStatusId { get; set; }
-        
+        public bool IsArchived { get; set; } = false;
 
 
         

@@ -47,14 +47,16 @@ namespace MigrationApi.Models
 
         [DataType(DataType.DateTime)]
         public DateTime Created_at { get; set; }
+        [DataType(DataType.DateTime)]
+        public DateTime Updated_at { get; set; }
 
-        // public Guid CreatedByUserID { get; set; }
+        public Guid CreatedByUserID { get; set; }
 
-        // public Guid UpdatedByUserID { get; set; }
-        // [ForeignKey(nameof(CreatedByUserID))]
-        // public User? CreatedByUser { get; set; }
-        // [ForeignKey(nameof(UpdatedByUserID))]
-        // public User? UpdatedByUser { get; set; }
+        public Guid? UpdatedByUserID { get; set; }
+        [ForeignKey(nameof(CreatedByUserID))]
+        public User? CreatedByUser { get; set; }
+        [ForeignKey(nameof(UpdatedByUserID))]
+        public User? UpdatedByUser { get; set; }
 
         public bool IsArchived { get; set; } = false;
 

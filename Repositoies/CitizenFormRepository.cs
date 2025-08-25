@@ -25,6 +25,8 @@ namespace MigrationApi.Repositories
          public async Task<CitizenForm?> GetByIdAsync(Guid id)
         {
             return await _context.CitizenForms
+            .Include(f => f.CreatedByUser)
+            .Include(f=>f.UpdatedByUser)
                 .Include(f => f.District).ThenInclude(d => d.Region)
                 .Include(f => f.Migrations).ThenInclude(m => m.Country)
                 .Include(f => f.Status)

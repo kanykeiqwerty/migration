@@ -8,10 +8,12 @@ namespace MigrationApi.Service
     public class CitizenFormService : ICitizenFormService
     {
         private readonly ICitizenFormRepository _repo;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CitizenFormService(ICitizenFormRepository repo)
+        public CitizenFormService(ICitizenFormRepository repo, ICurrentUserService currentUserService)
         {
             _repo = repo;
+            _currentUserService = currentUserService;
         }
 
         public async Task<List<CitizenFormDto>> GetAllAsync()
@@ -51,6 +53,7 @@ namespace MigrationApi.Service
 
             return new OneCitizenFormDto
             {
+                IsArchived = f.IsArchived,
                 RegistrationDate = f.RegistrationDate,
                 Id = f.Id,
                 ESYBMId = f.ESYBMId,
@@ -68,6 +71,7 @@ namespace MigrationApi.Service
                 Street = f.Street,
                 House = f.House,
                 Apartments = f.Apartments,
+
                 District = f.District == null ? null : new DistrictDto
                 {
                     Name = f.District.Name,
@@ -84,6 +88,7 @@ namespace MigrationApi.Service
                 {
                     Name = f.Status.Name
                 },
+
                 Migrations = f.Migrations.Select(m => new MigrationHistoryDto
                 {
                     DepartureDate = m.DepartureDate,
@@ -91,7 +96,12 @@ namespace MigrationApi.Service
                     Profession = m.Profession,
                     EmploymentContract = m.EmploymentContract,
                     CountryName = m.Country.Name
-                }).ToList()
+                }).ToList(),
+                CreatedByUserName = f.CreatedByUser?.UserName,
+                UpdatedByUserName = f.UpdatedByUser?.UserName,  // <-- имя обновившего
+                CreatedAt = f.Created_at, 
+                UpdatedAt = f.Updated_at
+    
             };
         }
 
@@ -102,6 +112,9 @@ namespace MigrationApi.Service
 
             if (!await _repo.MaritalStatusExistsAsync(dto.MaritalStatusId))
                 throw new ArgumentException("Invalid Marital Status Id");
+
+                var userId = _currentUserService.UserId ?? throw new Exception("User not authenticated");
+                
 
             var newform = new CitizenForm
             {
@@ -122,7 +135,10 @@ namespace MigrationApi.Service
                 Apartments = dto.Apartments,
                 DistrictID = dto.DistrictId,
                 MaritalStatusID = dto.MaritalStatusId,
-                StatusID = dto.StatusId
+                StatusID = dto.StatusId,
+                Created_at = DateTime.UtcNow,
+                CreatedByUserID = userId
+                
             };
 
             await _repo.AddAsync(newform);
@@ -132,6 +148,8 @@ namespace MigrationApi.Service
 
         public async Task<bool> UpdateAsync(Guid id, UpdateCitizenFormDto dto)
         {
+
+            var userId = _currentUserService.UserId ?? throw new Exception("User not authenticated");
             var form = await _repo.GetByIdAsync(id);
             if (form == null) return false;
 
@@ -159,7 +177,12 @@ namespace MigrationApi.Service
             form.DistrictID = dto.DistrictId;
             form.MaritalStatusID = dto.MaritalStatusId;
             form.StatusID = dto.StatusId;
+            form.UpdatedByUserID = userId;
+            form.Updated_at = DateTime.UtcNow;
+            
 
+            form.IsArchived = dto.IsArchived;
+            
             await _repo.UpdateAsync(form);
             await _repo.SaveAsync();
             return true;
