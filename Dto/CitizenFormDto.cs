@@ -8,7 +8,7 @@ namespace MigrationApi.Dto
         public DateTime RegistrationDate { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string PIN { get; set; } = string.Empty;
-        public DateOnly BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
 
         public Gender Gender { get; set; }
         // public RegionDto? Region { get; set; } 
@@ -25,7 +25,7 @@ namespace MigrationApi.Dto
         public DateTime RegistrationDate { get; set; }
         public Guid Id { get; set; }
         public string PIN { get; set; } = string.Empty;
-        public DateOnly BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
         public Gender Gender { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -63,7 +63,7 @@ namespace MigrationApi.Dto
         public DateTime RegistrationDate { get; set; }
 
         public string PIN { get; set; } = string.Empty;
-        public DateOnly BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
         public Gender Gender { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -94,15 +94,15 @@ namespace MigrationApi.Dto
     }
     public class UpdateCitizenFormDto
     {
-     
-        public DateOnly BirthDate { get; set; }
+
+        public DateTime BirthDate { get; set; }
         public Gender Gender { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string? MidName { get; set; }
         public string? Disabilities { get; set; }
         public string? PhoneNumber { get; set; }
-        
+
         public string? RuralArea { get; set; }
         public string? PopulationArea { get; set; }
         public string? Street { get; set; }
@@ -110,15 +110,36 @@ namespace MigrationApi.Dto
         public string? Apartments { get; set; }
         public int DistrictId { get; set; }
         public int StatusId { get; set; }
-        
 
-        
+
+
         public int MaritalStatusId { get; set; }
         public bool IsArchived { get; set; } = false;
 
 
+
+
+
+    }
+
+    public class CitizenFormFilterDto
+    {
+
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+        // public int totalCount { get; set; }
+        public DateTime? RegistrationDateFrom { get; set; }
+        public DateTime? RegistrationDateTo { get; set; }
         
-
-
+         public int? BirthYear { get; set; }
+        public string? Pin { get; set; }
+        public string? FullName { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public Gender? Gender { get; set; }
+        public string? Region { get; set; }
+        public string? District { get; set; }
+        public string? MigrationCountry { get; set; }
+        public DateTime? DepartureDate { get; set; }
+    public bool? IsArchived { get; set; }
    }
 }

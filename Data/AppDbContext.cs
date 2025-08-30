@@ -28,8 +28,16 @@ namespace MigrationApi.Data
             .WithMany()
             .HasForeignKey(u => u.RoleID);
 
-            
+            modelBuilder.Entity<Migration>(builder =>
+        {
+            builder.Property(m => m.DepartureDate)
+                   .HasColumnType("date");
+
+            builder.Property(m => m.ReturnDate)
+                   .HasColumnType("date");
+
+
+        });
         }
-        
     }
 }

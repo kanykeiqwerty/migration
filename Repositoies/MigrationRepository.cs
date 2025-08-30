@@ -28,11 +28,23 @@ namespace MigrationApi.Repositories
             .FirstOrDefaultAsync(m => m.Id == id);
         }
 
+        public async Task<CitizenForm?> GetCitizenFormByIdAsync(Guid id)
+        {
+            return await _context.CitizenForms
+            .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
         public async Task AddAsync(Migration migration) => await _context.Migrations.AddAsync(migration);
 
         public async Task UpdateAsync(Migration migration)
         {
             _context.Migrations.Update(migration);
+            await Task.CompletedTask;
+        }
+
+        public async Task UpdateCitizenFormAsync(CitizenForm form)
+        {
+            _context.CitizenForms.Update(form);
             await Task.CompletedTask;
         }
 

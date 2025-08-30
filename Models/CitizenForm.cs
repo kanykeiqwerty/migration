@@ -18,7 +18,9 @@ namespace MigrationApi.Models
         public string? MidName { get; set; }
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateOnly BirthDate { get; set; }
+        [Column(TypeName = "date")]
+
+        public DateTime BirthDate { get; set; }
 
         public Gender Gender { get; set; }
 
@@ -37,6 +39,8 @@ namespace MigrationApi.Models
         public string? House { get; set; }
         public string? Apartments { get; set; }
         [DataType(DataType.DateTime)]
+        [Column(TypeName = "date")]
+
         public DateTime RegistrationDate { get; set; }
         public int MaritalStatusID { get; set; }
         public MaritalStatus? MaritalStatus { get; set; }

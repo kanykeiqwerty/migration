@@ -60,12 +60,24 @@ namespace MigrationApi.Service
                 Profession = dto.Profession,
                 EmploymentContract = dto.EmploymentContract
             };
-            await _repo.AddAsync(newmigration);
+            
+             await _repo.AddAsync(newmigration);
+
+            if (dto.ReturnDate != null)
+            {
+                var citizenForm = await _repo.GetCitizenFormByIdAsync(dto.CitizenFormID);
+                if (citizenForm != null)
+                {
+                    citizenForm.IsArchived = true;
+                    await _repo.UpdateCitizenFormAsync(citizenForm);
+                }
+            }
+           
             await _repo.SaveAsync();
             return newmigration;
         }
 
-        public async Task<bool> UpdateAsync(Guid id, MigrationOneDto dto)
+        public async Task<bool> UpdateAsync(Guid id, UpdateMigrationDto dto)
         {
 
             var migration = await _repo.GetByIdAsync(id);
@@ -83,7 +95,18 @@ namespace MigrationApi.Service
             migration.EmploymentContract = dto.EmploymentContract;
 
 
+
             await _repo.UpdateAsync(migration);
+
+            if (dto.ReturnDate != null)
+            {
+                var citizenForm = await _repo.GetCitizenFormByIdAsync(migration.CitizenFormID);
+                if (citizenForm != null)
+                {
+                    citizenForm.IsArchived = true;
+                    await _repo.UpdateCitizenFormAsync(citizenForm);
+                }
+            }
             await _repo.SaveAsync();
             return true;
         }

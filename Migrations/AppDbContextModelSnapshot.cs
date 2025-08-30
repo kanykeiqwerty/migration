@@ -161,7 +161,7 @@ namespace MigrationApi.Migrations
                     b.Property<string>("Apartments")
                         .HasColumnType("text");
 
-                    b.Property<DateOnly>("BirthDate")
+                    b.Property<DateTime>("BirthDate")
                         .HasColumnType("date");
 
                     b.Property<Guid>("CreatedByUserID")
@@ -217,7 +217,7 @@ namespace MigrationApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("date");
 
                     b.Property<string>("RuralArea")
                         .HasColumnType("text");
@@ -320,7 +320,7 @@ namespace MigrationApi.Migrations
                     b.Property<int>("CountryID")
                         .HasColumnType("integer");
 
-                    b.Property<DateOnly>("DepartureDate")
+                    b.Property<DateTime>("DepartureDate")
                         .HasColumnType("date");
 
                     b.Property<bool>("EmploymentContract")
@@ -329,7 +329,7 @@ namespace MigrationApi.Migrations
                     b.Property<string>("Profession")
                         .HasColumnType("text");
 
-                    b.Property<DateOnly>("ReturnDate")
+                    b.Property<DateTime?>("ReturnDate")
                         .HasColumnType("date");
 
                     b.HasKey("Id");

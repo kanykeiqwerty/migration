@@ -41,7 +41,7 @@ namespace MigrationApi.Controllers
         }
         
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] MigrationOneDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMigrationDto dto)
         {
             var success = await _service.UpdateAsync(id, dto);
             if (!success) return NotFound();

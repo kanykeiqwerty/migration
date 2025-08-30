@@ -14,9 +14,9 @@ namespace MigrationApi.Models
 
 
         [DataType(DataType.Date)]
-        public DateOnly DepartureDate { get; set; }
+        public DateTime DepartureDate { get; set; }
         [DataType(DataType.Date)]
-        public DateOnly ReturnDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
         public string? Profession { get; set; }
         public bool EmploymentContract { get; set; }
 
